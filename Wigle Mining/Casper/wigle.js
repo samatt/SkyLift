@@ -303,7 +303,11 @@ var processPage = function() {
         casper.echo('No more results for : ' + args.currentSSID);        
         var s = casper.evaluate(checkForBlock);
         if(s['0'] ==='An Error has occurred:') {
+            casper.echo(" ");
+            casper.echo("******************************");
             casper.echo("Wigle has blocked this account.")
+            casper.echo("******************************");
+            casper.echo(" ")
             return terminate.call(casper);    
         }
         
@@ -401,20 +405,11 @@ var getData = function () {
 };
 
 var checkForBlock = function(){
-    var searchRows = document.querySelectorAll('.launchinner');
-
     
+    var searchRows = document.querySelectorAll('.launchinner');
     return Array.prototype.map.call(searchRows, function(e) {
-
-    //2 : BSSID , 3: essid , 10: last updated, 13: lat, 14: long , 15: timestamp
-    // if(e.childNodes[3].innerHTML === args.currentSSID){
         return e.childNodes[0].innerHTML;
-    // }
-    });
-
-    // for (var i = 0; i < text.length; i++) {
-    //     casper.echo(text[i]);
-    // };
+    });    
 }   
 
 

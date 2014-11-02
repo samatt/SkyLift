@@ -21,21 +21,18 @@ else
 
 	#making stand alone folder
 	echo "parse NSHeyyy data"
-	echo " "
 	cd Parsers
 
 	python queries.py probes ../$1 > ../Outputs/probes.txt
 
 
 	echo "get wigle data"
-	echo " "
 
 	cd ../Casper
 	casperjs --ssl-protocol=tlsv1 wigle.js --filename=../Outputs/probes.txt
 
 
 	echo "accumulate wigle and nshey data"
-	echo " "
 	cd ../Parsers
 	python queries.py networks ../Outputs/Wigle/ > ../$2
 
