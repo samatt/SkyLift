@@ -1,10 +1,7 @@
 import sys
 import os
-import pickle
 import utils
-import optparse
 import pprint
-import csv
 import json
 import random
 
@@ -12,13 +9,12 @@ routerMap = dict()
 clientMap = dict()
 
 def ssid_mac(path):
-    # names = pickle.load( open( filename, "rb" ) )
     
     networks = set()
     networks_output = dict()
     networks_geo = dict() 
     filenames = os.listdir(path)
-    print filenames
+    
     for f in filenames:
         name = f.split(".")
         networks.add(name[0])
@@ -32,6 +28,8 @@ def ssid_mac(path):
         try:
             geoData = json.load( open( path+"/"+network+".json", "rb" ) )
             if len(geoData['results']) > 0:
+                # print network + " has good json"
+                # print geoData
                 networks_output[network]['geo'] = geoData['results'][0]
 
         except : 

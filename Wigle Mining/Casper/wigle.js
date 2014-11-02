@@ -176,8 +176,8 @@ return this;
 //================================================================================
 
 var args = {};
-args.username = 'samatt';
-args.password = 'password';
+args.username = 'testgoya';
+args.password = 'testgoya';
 args.ssids = ['test'];
 args.currentSSID = '';
 var currentIndex = 0;
@@ -185,7 +185,7 @@ var currentIndex = 0;
 var linkData = [];
 var currentPage= 1 ;
 var x = require('casper').selectXPath;
-
+var maxCount;
 
 // utils.dump(casper.cli.options);
 
@@ -198,6 +198,13 @@ if(casper.cli.options.filename){
     args.currentSSID = args.ssids[0];
     console.log('SSID LIST: ');
     console.log(data);
+    if(args.ssids.length > 15){
+        maxCount = 15;    
+    }
+    else{
+        maxCount = args.ssids.length ;
+    }
+    
     
 }
 else if(casper.cli.options.ssid){
@@ -206,17 +213,21 @@ else if(casper.cli.options.ssid){
     // args.ssids = data.split(/[\r\n]/);
     args.currentSSID = casper.cli.options.ssid;
     console.log('Searching for SSID: '+ args.currentSSID);
+    maxCount = 2;
 
 }
 // var maxCount = args.ssids.length -1 || 2;
-var maxCount = 20;
+
 
 casper.start('http://wigle.net/', function() {
-    
+    console.log("here");
+    casper.click('input[name="noexpire"]');
 });
 
 //STEP: Sign in
 casper.then(function signIn() {
+    
+
     casper.fill('form[method="POST"]', {
         'credential_0': args.username,
         'credential_1': args.password,
@@ -265,7 +276,7 @@ var processPage = function() {
         linkData.push.apply(linkData,t);
 
         // don't go too far down the rabbit hole
-        if (currentPage >= 5) {
+        if (currentPage >= 3) {
             exportJSON(linkData);
             if(args.ssids.length > 0 && currentIndex <= maxCount){
                 currentPage = 1;
@@ -322,28 +333,40 @@ var exportJSON = function(data){
     fs.write('../Outputs/Wigle/'+args.currentSSID+'.json', d, 'w');
     // fs.write(args.currentSSID+'.json', d, 'w');
 };
+
+function compare(a,b) {
+  if (a.timestamp < b.timestamp)
+     return 1;
+  if (a.timestamp > b.timestamp)
+    return -1;
+  return 0;
+}
+
 function filterData (data){
     var count = 0;
-    var finalJson = ' { \"results\" :  [ ' ;   
-    casper.echo('FILTER DATA');
-    var filterDate = Date.parse('2008-01-01 00:00:00');
-    for (var i in data) {
-        if(data[i].essid.trim() === args.currentSSID.trim()){
-            // Date.parse(data[i]) > filterDate){
+    data.sort(compare);
 
-            if(i === data.length -1 ){
-                finalJson += JSON.stringify();    
-            }
-            else{
+    var finalJson = ' { \"results\" :  [ ' ;   
+    // casper.echo('FILTER DATA');
+    // var filterDate = Date.parse('2008-01-01 00:00:00');
+    for (var i in data) {
+        // casper.echo(data[i].essid + ' : ' +data[i].tString);
+        if(data[i].essid.trim() === args.currentSSID.trim()
+            && i === data.length -1){
+                finalJson += JSON.stringify(data[i]);    
+
+        }
+        else if(data[i].essid.trim() === args.currentSSID.trim()
+            && i !== data.length -1){
                 count++;
                 finalJson += JSON.stringify(data[i]) + ',';
-            }    
-
-        }
+        }    
         else{
-            casper.echo( args.currentSSID +  '!== ' + data[i].essid);
+            casper.echo( args.currentSSID +  ' !== ' + data[i].essid);
         }
+        
     }
+    finalJson +=  '{}';
     finalJson += ' ] }';
 
     return finalJson;
