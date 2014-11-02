@@ -53,7 +53,7 @@ def probeList():
             
             for probe in v['probes']:
                 if probe is not None:
-                    names.add(probe)
+                    names.add('\''+probe+'\'')
     
     for name in names:
         if name is not None:

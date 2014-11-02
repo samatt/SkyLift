@@ -199,7 +199,7 @@ if(casper.cli.options.filename){
     console.log('SSID LIST: ');
     console.log(data);
     if(args.ssids.length > 15){
-        maxCount = 15;    
+        maxCount = 10;    
     }
     else{
         maxCount = args.ssids.length ;
