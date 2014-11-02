@@ -176,9 +176,9 @@ return this;
 //================================================================================
 
 var args = {};
-args.username = 'testgoya';
-args.password = 'testgoya';
-args.ssids = ['test'];
+args.username = 'samatt';
+args.password = 'password';
+args.ssids = [];
 args.currentSSID = '';
 var currentIndex = 0;
 
@@ -213,7 +213,8 @@ else if(casper.cli.options.ssid){
     // args.ssids = data.split(/[\r\n]/);
     args.currentSSID = casper.cli.options.ssid;
     console.log('Searching for SSID: '+ args.currentSSID);
-    maxCount = 2;
+    maxCount = 1;
+    args.ssids = ['args.currentSSID']
 
 }
 // var maxCount = args.ssids.length -1 || 2;
@@ -299,8 +300,14 @@ var processPage = function() {
         });
     }
     else{
-        casper.echo('No more results for : ' + args.currentSSID);
-        exportJSON(linkData);
+        casper.echo('No more results for : ' + args.currentSSID);        
+        var s = casper.evaluate(checkForBlock);
+        if(s['0'] ==='An Error has occurred:') {
+            casper.echo("Wigle has blocked this account.")
+            return terminate.call(casper);    
+        }
+        
+        
         
         if(args.ssids.length > 0 && currentIndex <= maxCount){
             currentPage = 1;
@@ -372,26 +379,44 @@ function filterData (data){
     return finalJson;
 }
 
-    var getData = function () {
-        var searchRows = document.querySelectorAll('.search');
+var getData = function () {
+    var searchRows = document.querySelectorAll('.search');
 
-        return Array.prototype.map.call(searchRows, function(e) {
+    return Array.prototype.map.call(searchRows, function(e) {
 
-        //2 : BSSID , 3: essid , 10: last updated, 13: lat, 14: long , 15: timestamp
-        // if(e.childNodes[3].innerHTML === args.currentSSID){
-            
-            var myObj = {
-                'bssid' : e.childNodes[2].innerHTML,
-                'essid' : e.childNodes[3].innerHTML,
-                'tString' : e.childNodes[10].innerHTML,
-                'timestamp' : e.childNodes[15].innerHTML,
-                'lat' : e.childNodes[13].innerHTML,
-                'lon' : e.childNodes[14].innerHTML
-            };
-            return myObj;
-        // }
+    //2 : BSSID , 3: essid , 10: last updated, 13: lat, 14: long , 15: timestamp
+    // if(e.childNodes[3].innerHTML === args.currentSSID){
         
+        var myObj = {
+            'bssid' : e.childNodes[2].innerHTML,
+            'essid' : e.childNodes[3].innerHTML,
+            'tString' : e.childNodes[10].innerHTML,
+            'timestamp' : e.childNodes[15].innerHTML,
+            'lat' : e.childNodes[13].innerHTML,
+            'lon' : e.childNodes[14].innerHTML
+        };
+        return myObj;
+    // }
     });
-    };
+};
+
+var checkForBlock = function(){
+    var searchRows = document.querySelectorAll('.launchinner');
+
+    
+    return Array.prototype.map.call(searchRows, function(e) {
+
+    //2 : BSSID , 3: essid , 10: last updated, 13: lat, 14: long , 15: timestamp
+    // if(e.childNodes[3].innerHTML === args.currentSSID){
+        return e.childNodes[0].innerHTML;
+    // }
+    });
+
+    // for (var i = 0; i < text.length; i++) {
+    //     casper.echo(text[i]);
+    // };
+}   
+
+
 
 
