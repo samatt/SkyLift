@@ -205,10 +205,10 @@ if(casper.cli.options.filename){
     console.log(data);
 
     if(args.ssids.length > 15){
-        maxCount = 10;    
+        maxCount = 15;    
     }
     else{
-        maxCount = args.ssids.length ;
+        maxCount = args.ssids.length-1 ;
     }
     
     
@@ -281,15 +281,18 @@ var processPage = function() {
 
         var t = casper.evaluate(getData);
         linkData.push.apply(linkData,t);
-
+        
         // don't go too far down the rabbit hole
-        if (currentPage >= 3) {
+        if (currentPage >= 4) {
             exportJSON(linkData);
-            if(args.ssids.length > 0 && currentIndex <= maxCount){
+            if(args.ssids.length > 0 && currentIndex <= maxCount){                
                 currentPage = 1;
                 excuteNewQuery();
             }
             else{
+                casper.echo(args.ssids.length);
+                casper.echo(maxCount);
+                casper.echo(currentIndex);
                 return terminate.call(casper);    
             }
         }
@@ -316,7 +319,6 @@ var processPage = function() {
             casper.echo(" ")
             return terminate.call(casper);    
         }
-        
         
         
         if(args.ssids.length > 0 && currentIndex <= maxCount){
