@@ -302,7 +302,7 @@ var processPage = function() {
     else{
         casper.echo('No more results for : ' + args.currentSSID);        
         var s = casper.evaluate(checkForBlock);
-        if(s['0'] ==='An Error has occurred:') {
+        if(s['0'] !== null && s['0'] ==='An Error has occurred:') {
             casper.echo(" ");
             casper.echo("******************************");
             casper.echo("Wigle has blocked this account.")
