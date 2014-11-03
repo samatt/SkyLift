@@ -31,15 +31,24 @@ def ssid_mac(path):
                 # print network + " has good json"
                 # print geoData
                 networks_output[network]['geo'] = geoData['results'][0]
+            else:
+                networks_output[network]['geo'] = {}
 
         except : 
             pass
         
-        for k,v in clientMap.iteritems():
-            if 'probes' in v.keys() and v['probes'] is not None:
-                if network in v['probes']:
-                    if network in networks_output.keys():
-                        networks_output[network]['ids'].append(v['bssid'])
+    for k,v in clientMap.iteritems():
+        if 'probes' in v.keys() and v['probes'] is not None:
+            if len(v['probes']) > 0:
+
+                for net in v['probes']:
+                    if net in networks_output.keys():
+                        
+                        networks_output[net]['ids'].append(v['bssid'])
+                    else:
+                        networks_output[net] = {}
+                        networks_output[net]['geo'] = {}
+                        networks_output[net]['ids'] = [v['bssid']]
 
     
     # pprint.pprint (networks_output)
