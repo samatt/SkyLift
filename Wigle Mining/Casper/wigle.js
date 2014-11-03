@@ -195,9 +195,15 @@ if(casper.cli.options.filename){
     var data = fs.read(casper.cli.options.filename);
     
     args.ssids = data.split(/[\r\n]/);
+    for (var i = 0; i < args.ssids.length; i++) {
+        args.ssids[i];
+
+        args.ssids[i] = args.ssids[i].substr(1, args.ssids[i].length -2) ;
+    };
     args.currentSSID = args.ssids[0];
     console.log('SSID LIST: ');
     console.log(data);
+
     if(args.ssids.length > 15){
         maxCount = 10;    
     }
@@ -302,7 +308,7 @@ var processPage = function() {
     else{
         casper.echo('No more results for : ' + args.currentSSID);        
         var s = casper.evaluate(checkForBlock);
-        if(s['0'] !== null && s['0'] ==='An Error has occurred:') {
+        if(s !== null && s['0'] ==='An Error has occurred:') {
             casper.echo(" ");
             casper.echo("******************************");
             casper.echo("Wigle has blocked this account.")
