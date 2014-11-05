@@ -57,3 +57,11 @@ bower_components
 /Wigle Mining/Parsers/mayday.json
 
 /Wigle Mining/Parsers/OutputTest.json
+
+/app/web-app/test.json
+/app/web-app/test2.json
+
+/app/node-app/.Gruntfile.js.swp
+
+/app/node-app/build/
+/app/node-app/cache/
