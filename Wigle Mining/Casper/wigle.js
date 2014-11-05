@@ -20,6 +20,7 @@ var casper = require('casper').create({pageSettings: {
 var utils = require('utils');
 var f = utils.format;
 var fs = require('fs');
+
 /**
  * Revised checkStep() function for realizing label() and goto()
  * Every revised points are commented.
@@ -176,8 +177,9 @@ return this;
 //================================================================================
 
 var args = {};
-args.username = 'samatt';
-args.password = 'password';
+
+args.username = 'something';
+args.password = 'otherthing';
 args.ssids = [];
 args.currentSSID = '';
 var currentIndex = 0;
@@ -204,17 +206,17 @@ if(casper.cli.options.filename){
     console.log('SSID LIST: ');
     console.log(data);
 
-    if(args.ssids.length > 15){
-        maxCount = 15;    
-    }
-    else{
+    // if(args.ssids.length > 15){
+        // maxCount = args.ssids.length -5;    
+    // }
+    // else{
         maxCount = args.ssids.length-1 ;
-    }
+    // }
     
     
 }
 else if(casper.cli.options.ssid){
-    
+
     // var data = fs.read(casper.cli.options.ssid);
     // args.ssids = data.split(/[\r\n]/);
     args.currentSSID = casper.cli.options.ssid;
@@ -233,7 +235,7 @@ casper.start('http://wigle.net/', function() {
 
 //STEP: Sign in
 casper.then(function signIn() {
-    
+
 
     casper.fill('form[method="POST"]', {
         'credential_0': args.username,
@@ -271,10 +273,13 @@ var terminate = function() {
     exportJSON(linkData);
     this.echo('thats all, folks.').exit();
 };
+var timeOut = function(){
+    this.echo('Timing Out!');
+}
 
 var processPage = function() {
     var url;
-    
+    casper.echo("Process Page")
     casper.capture('../Debug/'+args.currentSSID +'_' +currentPage + '.png');
     if (casper.exists('input[value="Next100 >>"]')) {
 
@@ -283,9 +288,11 @@ var processPage = function() {
         linkData.push.apply(linkData,t);
         
         // don't go too far down the rabbit hole
-        if (currentPage >= 4) {
-            exportJSON(linkData);
+        if (currentPage > 3) {
+
+            
             if(args.ssids.length > 0 && currentIndex <= maxCount){                
+                exportJSON(linkData);
                 currentPage = 1;
                 excuteNewQuery();
             }
@@ -300,12 +307,16 @@ var processPage = function() {
         currentPage++;
         casper.echo('requesting next page: ' + currentPage);
         url = casper.getCurrentUrl();
+        
         casper.thenClick('input[value="Next100 >>"]').then(function() {
-            casper.waitFor(function() {
-                casper.echo(url == casper.getCurrentUrl());
-                return url == casper.getCurrentUrl();
-            }, processPage, terminate,function timeout(){casper.echo('TIMED OUT');}
-            );
+            
+            // casper.waitFor(function() {
+                
+            //     casper.echo(url == casper.getCurrentUrl())
+            //     return url == casper.getCurrentUrl();
+            // }, timeOut,processPage);
+            // casper.capture('wtf.png');
+            processPage();
         });
     }
     else{
@@ -323,6 +334,7 @@ var processPage = function() {
         
         if(args.ssids.length > 0 && currentIndex <= maxCount){
             currentPage = 1;
+            exportJSON(linkData);
             excuteNewQuery();
         }
         else{
@@ -332,11 +344,17 @@ var processPage = function() {
     
 };
 
+
 var excuteNewQuery = function(){
-    args.currentSSID  = args.ssids[currentIndex];
-    
-    casper.echo('NEW QUERY : ' + args.currentSSID);
     currentIndex++;
+    args.currentSSID  = args.ssids[currentIndex];
+    while (fs.exists('../Outputs/Wigle/'+args.currentSSID+'.json') ){
+        casper.echo('Found file ' + '../Outputs/Wigle/'+args.currentSSID+'.json');
+       currentIndex++;
+        args.currentSSID  = args.ssids[currentIndex]; 
+    }    
+
+    casper.echo('NEW QUERY : ' + args.currentSSID);
     casper.then(function noMoreResults(){
         linkData = [];
         casper.goto('QUERY_PAGE');
@@ -344,21 +362,25 @@ var excuteNewQuery = function(){
 };
 
 var exportJSON = function(data){
-    casper.echo('Exporting JSON '+args.currentSSID+'.json with '+ data.length + ' locations');
-
-    var d = filterData(data);
-
     
-    fs.write('../Outputs/Wigle/'+args.currentSSID+'.json', d, 'w');
+    if(data.length > 0){
+        casper.echo('Exporting JSON '+args.currentSSID+'.json with '+ data.length + ' locations');
+        var d = filterData(data);
+        fs.write('../Outputs/Wigle/'+args.currentSSID+'.json', d, 'w');    
+    }
+    else{
+        casper.echo("No data for " + args.currentSSID);
+    }
+    
     // fs.write(args.currentSSID+'.json', d, 'w');
 };
 
 function compare(a,b) {
   if (a.timestamp < b.timestamp)
-     return 1;
-  if (a.timestamp > b.timestamp)
+   return 1;
+if (a.timestamp > b.timestamp)
     return -1;
-  return 0;
+return 0;
 }
 
 function filterData (data){
@@ -372,23 +394,23 @@ function filterData (data){
         // casper.echo(data[i].essid + ' : ' +data[i].tString);
         if(data[i].essid.trim() === args.currentSSID.trim()
             && i === data.length -1){
-                finalJson += JSON.stringify(data[i]);    
+            finalJson += JSON.stringify(data[i]);    
 
-        }
-        else if(data[i].essid.trim() === args.currentSSID.trim()
-            && i !== data.length -1){
-                count++;
-                finalJson += JSON.stringify(data[i]) + ',';
-        }    
-        else{
-            casper.echo( args.currentSSID +  ' !== ' + data[i].essid);
-        }
-        
     }
-    finalJson +=  '{}';
-    finalJson += ' ] }';
+    else if(data[i].essid.trim() === args.currentSSID.trim()
+        && i !== data.length -1){
+        count++;
+    finalJson += JSON.stringify(data[i]) + ',';
+}    
+else{
+    casper.echo( args.currentSSID +  ' !== ' + data[i].essid);
+}
 
-    return finalJson;
+}
+finalJson +=  '{}';
+finalJson += ' ] }';
+
+return finalJson;
 }
 
 var getData = function () {
@@ -398,7 +420,7 @@ var getData = function () {
 
     //2 : BSSID , 3: essid , 10: last updated, 13: lat, 14: long , 15: timestamp
     // if(e.childNodes[3].innerHTML === args.currentSSID){
-        
+
         var myObj = {
             'bssid' : e.childNodes[2].innerHTML,
             'essid' : e.childNodes[3].innerHTML,
@@ -409,11 +431,11 @@ var getData = function () {
         };
         return myObj;
     // }
-    });
+});
 };
 
 var checkForBlock = function(){
-    
+
     var searchRows = document.querySelectorAll('.launchinner');
     return Array.prototype.map.call(searchRows, function(e) {
         return e.childNodes[0].innerHTML;
