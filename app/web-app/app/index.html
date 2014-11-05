@@ -1,0 +1,81 @@
+<!doctype html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8">
+    <title>SKYLIFT (0.1)</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(.) styles/vendor.css -->
+    <!-- bower:css -->
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css(.tmp) styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+    <!-- Cesium, copy only -->
+    <link rel="stylesheet" href="Cesium/Widgets/widgets.css">
+    <!-- build:js scripts/vendor/modernizr.js -->
+    <script src="bower_components/modernizr/modernizr.js"></script>
+    <!-- endbuild -->
+
+  </head>
+  <body>
+<div id="overflow-container">
+<div id="sidebar" class="interface">
+		
+		<div id="toc-logo"><img src="images/logo.png"></div>
+    
+    <div class="toc_title">
+			<div class="app-version"><strong>SKYLIFT (0.1)</strong></div>
+    </div>
+    
+		<!-- Form select file input -->    
+		<div class="form-select-file">
+			<select id="file-list" class="form-control form-sidebar">
+				<option valueselected>- Please select a log file</option>
+			</select>
+		</div>
+		
+		<!-- Network list -->  
+		<div class="networks-container">
+	    
+	    <h2 id="network-list-title"></h2>
+	    
+	    <ul class="networks">
+	    	<!-- populate with loaded file -->
+	    </ul>
+	    
+    </div>
+
+		<!-- Footer -->
+		<!--
+		<ul class="toc_footer">
+      <li>&raquo; <a href="http://github.com/xxx">GitHub Repository</a></li>
+      <li>&raquo; Credits </li>
+      <li>&raquo; Application Notes </li>
+		</ul>
+		-->
+		
+  </div>
+
+  <div id="cesium-parent-container">
+		<div id="cesiumContainer"></div>
+  </div>
+	
+    <!-- build:js(.) scripts/vendor.js -->
+    <!-- bower:js -->
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/jquery.scrollTo/jquery.scrollTo.js"></script>
+    <script src="bower_components/jquery.easing/js/jquery.easing.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+		<script src="Cesium/Cesium.js"></script>		
+    <!-- build:js({app,.tmp}) scripts/main.js -->
+    <script src="scripts/main.js"></script>
+    <!-- endbuild -->
+</div>
+</body>
+</html>
+<!-- SKYLIFT: Adam Harvey, Surya Mattu -->
