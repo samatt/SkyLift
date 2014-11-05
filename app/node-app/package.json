@@ -1,0 +1,8 @@
+{
+  "name": "skylift",
+  "description": "SKYLIFT app",
+  "devDependencies": {
+    "grunt": "latest",
+    "grunt-node-webkit-builder": "latest"
+  }
+}

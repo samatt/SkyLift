@@ -1,0 +1,26 @@
+{
+  "main": "index.html",
+  "name": "skylift",
+  "description": "skylift wifi network geo-visualization",
+  "version": "0.0.1",
+  "keywords": [ "demo", "node-webkit" ],
+  "window": {
+    "title": "skylift demo",
+    "icon": "link.png",
+    "toolbar": true,
+    "frame": true,
+    "width": 1280,
+    "height": 720,
+    "position": "center",
+    "min_width": 1280,
+    "min_height": 720,
+    "max_width": 1280,
+    "max_height": 720
+  },
+  "webkit": {
+    "plugin": true
+  },
+  "dependencies": {
+    "deck":"latest"
+  }
+}

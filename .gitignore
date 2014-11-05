@@ -22,7 +22,8 @@
 
 # Data #
 ######################
-*.json
+Outputs
+Data
 *.png
 *.pyc
 
