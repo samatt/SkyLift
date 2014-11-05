@@ -24,6 +24,7 @@
 ######################
 Outputs
 Data
+Debug
 *.png
 *.pyc
 
@@ -52,3 +53,7 @@ dist
 .tmp
 .sass-cache
 bower_components
+
+/Wigle Mining/Parsers/mayday.json
+
+/Wigle Mining/Parsers/OutputTest.json
