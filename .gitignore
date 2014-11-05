@@ -20,7 +20,6 @@
 *.tar
 *.zip
 
-
 # Data #
 ######################
 *.json
@@ -43,3 +42,12 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+
+# Grunt / Web App stuff #
+#########################
+node_modules
+dist
+.tmp
+.sass-cache
+bower_components
