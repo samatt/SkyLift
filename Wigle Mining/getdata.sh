@@ -10,11 +10,11 @@ then
     echo "Usage: ./getdata.sh <input filename> <output filename>"
 else
 	echo "Deleting old temp files"
-	rm -r Outputs
-	mkdir Outputs
-	cd Outputs
-	mkdir Wigle
-	cd ..
+	# rm -r Outputs
+	# mkdir Outputs
+	# cd Outputs
+	# mkdir Wigle
+	# cd ..
 
 	rm -r Debug
 	mkdir Debug
@@ -35,6 +35,7 @@ else
 	echo "accumulate wigle and nshey data"
 	cd ../Parsers
 	python queries.py networks ../Outputs/Wigle/ > ../$2
+	cp ../$2 ../../skylift.intercept/web-app/app/_private/data
 
 fi
 
