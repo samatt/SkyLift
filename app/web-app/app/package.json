@@ -7,7 +7,7 @@
   "window": {
     "title": "skylift demo",
     "icon": "link.png",
-    "toolbar": true,
+    "toolbar": false,
     "frame": true,
     "width": 1280,
     "height": 720,

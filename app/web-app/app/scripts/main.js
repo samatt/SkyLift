@@ -125,11 +125,10 @@ $(document).ready(function() {
 			});
 			
 			$.each( skylift.entries, function(k1,entry){
-				
+				entry.name = entry.name.trim();
 				// filter out
 				if( entry.name === null || entry.name === "") return;
-				
-				node =  '<li class="network-name" data-net-uid="' + entry.uid + '">';
+				node =  '<li class="network-name" data-net-uid="' + entry.uid + '" data-full-name="' + entry.name + '">';
 				node += '<span style="display:block"><a href="#" >' + entry.name + '</a> (' + entry.ids.length + ')</span>';
 				
 				node += '	<span class="l2">'; // hide elements until clicked
@@ -181,11 +180,40 @@ $(document).ready(function() {
 				node = null;
 			});
 
-console.log('set mouse events');
-this.attachSSIDMouseEvents();
-
-console.log('set network markers');
+			console.log('set mouse events');
+			this.attachSSIDMouseEvents();
+			this.sortMeu("alphabetically");
+			console.log('set network markers');
+			
 			setGeoMarkers(); // function hanging outside scope, fix later
+		},
+
+		sortMeu: function(order){
+			// return;
+			if(order == "alphabetically"){
+				// rearrange the network elements alphabetically
+				$("ul.networks > li").sort(skylift.sort_li).appendTo('ul.networks');
+			}
+		},
+
+		sort_li: function(a, b){
+		
+		    //return ($(b).data('position')) < ($(a).data('position')) ? 1 : -1;
+		    var d1 = $(b).attr('data-full-name');
+		    
+		    if( !(typeof(d1) === undefined)){
+		    	d1 = $(b).attr('data-full-name').substring(0,1);
+		    } else {
+		    	d1 = "";
+		    }
+
+		    var d2 = $(a).attr('data-full-name');
+		    if( !(typeof(d2) === undefined) ){
+		    	d2 = $(a).attr('data-full-name').substring(0,1);
+		    } else {
+		    	d2 = "";
+		    }
+		    return ($(b).attr('data-full-name').substring(0,1)) < ($(a).attr('data-full-name').substring(0,1)) ? 1 : -1;
 		},
 
 		// --------------------------------------------------------------------------------
