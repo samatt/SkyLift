@@ -14,9 +14,26 @@
 */
 
 $(document).ready(function() {
-	
+	var chooser = document.querySelector('#openFile');
+	var saveFilenameEl = document.querySelector('#saveFilename');
 	var viewer, scene, primitives, handler, boards;
 	
+	// saveFilenameEl.addEventListener('click', function(evt) {
+	// 	console.log("CLICKED");
+
+ //  		chooser.click();
+	// });
+
+	chooser.addEventListener('change', function(evt) {
+  		
+  		console.log(this.value);
+  		$('li.network-name').remove();
+  		
+  		skylift.loadSSIDList(this.value);
+  		// var filename = this.value.split('/');
+  		// $('#saveFilename').html(filename[filename.length -1].split('.')[0]);
+  		// saveFilenameEl.textContent = this.value ? Path.basename(this.value) : '(click to choose)';
+	}, false);
 	
 	var skylift = {
 		
@@ -26,8 +43,10 @@ $(document).ready(function() {
 		// --------------------------------------------------------------------------------
 		
 		loadFileList: function( ){
+			console.log('HERE');
 			$.getJSON( '_private/data/_file_list.json', function( data ) {
 				var nodes = '';
+				
 				$.each( data.files, function( key, val ) {
 					nodes += '<option value="' + val.file + '">' + val.name + '</option>';
 				});	
@@ -46,7 +65,8 @@ $(document).ready(function() {
 		// --------------------------------------------------------------------------------
 		
 		loadSSIDList: function( file ){
-			$.getJSON( '_private/data/logs/' + file, function( data ) {
+			$.getJSON( file, function( data ) {
+			// $.getJSON( '_private/data/logs/' + file, function( data ) {
 				skylift.entries =[];
 				$.each(data, function(key,entry){
 
