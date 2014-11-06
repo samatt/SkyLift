@@ -30,6 +30,7 @@ $(document).ready(function() {
 		chooser.addEventListener('change', function(evt) {
 	  		console.log(this.value);
 	  		$('li.network-name').remove();
+	  		$('#network-list-title').html('Loading...');
 	  		skylift.loadSSIDList(this.value);
 		}, false);
 	}
@@ -40,7 +41,6 @@ $(document).ready(function() {
 		$('#openFile').hide();
 		
 	}
-
 	
 	var skylift = {
 		
@@ -72,6 +72,7 @@ $(document).ready(function() {
 		// --------------------------------------------------------------------------------
 		
 		loadSSIDList: function( file ){
+
 			if(isNodeWebkit){
 				$.getJSON( file, function( data ) {
 				skylift.entries =[];
