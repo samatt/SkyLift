@@ -327,6 +327,7 @@ module.exports = function (grunt) {
             'styles/fonts/{,*/}*.*',
             'package.json',
             'Cesium/**',
+            'images/**',
             '_private/**'
           ]
         }, {
