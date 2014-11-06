@@ -8,5 +8,5 @@ rm -rf build
 echo "3/3 Build node-app distribution"
 grunt nodewebkit
 echo "Done. Opening nodewebkit app."
-open ./node-app/build/skylift/osx/skylift.app
+open build/skylift/osx/skylift.app
 
