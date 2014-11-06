@@ -35,7 +35,7 @@ else
 	echo "accumulate wigle and nshey data"
 	cd ../Parsers
 	python queries.py networks ../Outputs/Wigle/ > ../$2
-	cp ../$2 ../../skylift.intercept/web-app/app/_private/data
+	cp ../$2 ../../app/web-app/app/_private/data
 
 fi
 
