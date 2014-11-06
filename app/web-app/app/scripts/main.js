@@ -14,26 +14,33 @@
 */
 
 $(document).ready(function() {
-	var chooser = document.querySelector('#openFile');
-	var saveFilenameEl = document.querySelector('#saveFilename');
 	var viewer, scene, primitives, handler, boards;
-	
-	// saveFilenameEl.addEventListener('click', function(evt) {
-	// 	console.log("CLICKED");
+	$('#form-select-file-nw').hide();
+	$('#openFile').hide();
+	$('#form-select-file-w').hide();
 
- //  		chooser.click();
-	// });
+	var isNodeWebkit = (typeof process == "object");
+	if (isNodeWebkit)
+	{
+		$('#form-select-file-w').hide();
+		$('#form-select-file-nw').show();
+		$('#openFile').show();
+	    var chooser = document.querySelector('#openFile');
+		var saveFilenameEl = document.querySelector('#saveFilename');
+		chooser.addEventListener('change', function(evt) {
+	  		console.log(this.value);
+	  		$('li.network-name').remove();
+	  		skylift.loadSSIDList(this.value);
+		}, false);
+	}
+	else{
+		console.log("Not webkit");
+		$('#form-select-file-w').show();
+		$('#form-select-file-nw').hide();
+		$('#openFile').hide();
+		
+	}
 
-	chooser.addEventListener('change', function(evt) {
-  		
-  		console.log(this.value);
-  		$('li.network-name').remove();
-  		
-  		skylift.loadSSIDList(this.value);
-  		// var filename = this.value.split('/');
-  		// $('#saveFilename').html(filename[filename.length -1].split('.')[0]);
-  		// saveFilenameEl.textContent = this.value ? Path.basename(this.value) : '(click to choose)';
-	}, false);
 	
 	var skylift = {
 		
@@ -65,8 +72,17 @@ $(document).ready(function() {
 		// --------------------------------------------------------------------------------
 		
 		loadSSIDList: function( file ){
-			$.getJSON( file, function( data ) {
-			// $.getJSON( '_private/data/logs/' + file, function( data ) {
+			if(isNodeWebkit){
+				$.getJSON( file, function( data ) {
+				skylift.entries =[];
+				$.each(data, function(key,entry){
+					skylift.entries.push( entry );
+				});
+				skylift.onLoadSSIDList();
+			});	
+			}
+			else{
+			$.getJSON( '_private/data/logs/' + file, function( data ) {
 				skylift.entries =[];
 				$.each(data, function(key,entry){
 
@@ -74,6 +90,7 @@ $(document).ready(function() {
 				});
 				skylift.onLoadSSIDList();
 			});
+			}
 			
 		},
 		
