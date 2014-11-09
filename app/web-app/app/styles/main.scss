@@ -95,7 +95,8 @@ div#sidebar {
 		  margin: 0 0 6px 0;
 		  a {
 				text-decoration: none;
-				color: #666666;
+        font-weight: 100;
+				color: #888888;
 				&:hover{
 					text-decoration: underline;
 				}
@@ -107,7 +108,16 @@ div#sidebar {
 					text-decoration: none;
 				}
 			}
+      a.network-name-geo {
+        
+        color: #666666;
+        font-weight: bold;
+        &:hover{
+          text-decoration: underline;
+        }
+      }
 		}
+
 		span.l2{
 			display: none;
 			margin:0 0 10px 10px;
@@ -129,6 +139,20 @@ div#sidebar {
 			margin: 3px 0 10px 12px;
 			text-transform: uppercase;
 		}
+    ul.tstamp{
+      // display: none; // default hidden
+      font-size: 10px;
+      font-weight: bold;
+      margin: 14px 0 0px 0px;
+      text-transform: uppercase;
+      li{
+        text-decoration: none;
+        font-weight: 100;
+        color: #888888;
+        margin-top: -8px;
+        margin-left: 11px;
+      }
+    }
 		// SUB ul::mac
 		ul.mac{
 			// display: none; // default hidden

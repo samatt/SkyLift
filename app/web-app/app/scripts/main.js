@@ -53,14 +53,13 @@ $(document).ready(function() {
 			console.log('HERE');
 			$.getJSON( '_private/data/_file_list.json', function( data ) {
 				var nodes = '';
-				
+				nodes += '<option value="0"> Select File </option>';
 				$.each( data.files, function( key, val ) {
 					nodes += '<option value="' + val.file + '">' + val.name + '</option>';
 				});	
 
 				$('select#file-list').append(nodes)
 				.change(function () {
-					console.log('removing');
 					$('li.network-name').remove();
 					$('#network-list-title').html('Loading...');
 					skylift.loadSSIDList($(this).find( 'option:selected' ).eq(0).val());
@@ -86,8 +85,11 @@ $(document).ready(function() {
 			$.getJSON( '_private/data/logs/' + file, function( data ) {
 				skylift.entries =[];
 				$.each(data, function(key,entry){
+					if(entry.ids.length <= 0){
+						console.log("No ids found for: " +entry.name);
+					}
 
-					skylift.entries.push( entry );
+					skylift.entries.push( entry );	
 				});
 				skylift.onLoadSSIDList();
 			});
@@ -128,10 +130,7 @@ $(document).ready(function() {
 				entry.name = entry.name.trim();
 				// filter out
 				if( entry.name === null || entry.name === "") return;
-				node =  '<li class="network-name" data-net-uid="' + entry.uid + '" data-full-name="' + entry.name + '">';
-				node += '<span style="display:block"><a href="#" >' + entry.name + '</a> (' + entry.ids.length + ')</span>';
 				
-				node += '	<span class="l2">'; // hide elements until clicked
 				
 				if( !(
 					entry.geo === null || entry.geo === undefined
@@ -142,38 +141,56 @@ $(document).ready(function() {
 					|| entry.geo.lon === ''
 					|| entry.geo.lat === ''
 					) ){
-					node += '		<ul class="network-info">';
+				node =  '<li class="network-name" data-net-uid="' + entry.uid + '" data-full-name="' + entry.name + '">';
+				// node += '<span style="display:block"><a class="network-name-geo" href="#" >' + entry.name + '</a> (' + entry.ids.length + ')</span>';
+				node += '<span style="display:block"><a class="network-name-geo" href="#" >' + entry.name +'</a></span>	';
+				node += '	<span class="l2">'; // hide elements until clicked
+				node += '		<ul class="network-info">';
 				node += '			<li>Network Info</li>';
 				node += '		</ul>';
 				
 				node += '		<ul class="geo">';
 				node += '			<li class="latlong" data-net-uid="' + entry.uid +'"><a href="#">' + entry.geo.lat + ', ' + entry.geo.lon + '</a></li>';
 				node += '		</ul>';
+
+				node += '		<ul class="network-info">';
+				node += '			<li>Last Time Seen</li>';
+				node += '		</ul>';
+				node += '		<ul class="tstamp">';
+				node += '			<li >'+ entry.geo.tString+'</li>';
+				node += '		</ul>';
+			}
+			else{
+				node =  '<li class="network-name" data-net-uid="' + entry.uid + '" data-full-name="' + entry.name + '">';
+				node += '<span style="display:block"><a href="#" >' + entry.name + '</a> </span>';
+				
+				node += '	<span class="l2">'; // hide elements until clicked
 			}
 
 			if( entry.ids !== null && entry.ids.length > 0 ){
-				node += '		<ul class="network-info">';
-				node += '			<li>Associated MACs</li>';
-				node += '		</ul>';
+				node += '<ul class="network-info">';
+				node += '	<li>Associated MACs</li>';
+				node += '</ul>';
 				
-				node += '		<ul class="mac">';
+				node += '	<ul class="mac">';
 					// for each network mac id
 					$.each( entry.ids, function(k2,id){
-						node += '			<li><a href="#">' + id + '</a>';
+						node += '		<li><a href="#">' + id + '</a>';
 						// for each network name associated with this mac address
-						node += '			<ul class="ssid-mac">';
+						node += '		<ul class="ssid-mac">';
 						$.each( skylift.entries, function(k3, entryRef){
 							$.each( entryRef.ids, function(k4,idRef){
 								if( idRef === id ){
-									node += '				<li data-net-uid="' + entryRef.uid + '" data-parent-uid="' + entry.uid + '">../<a href="#">' + entryRef.name + '</a></li>';	
+									node += '			<li data-net-uid="' + entryRef.uid + '" data-parent-uid="' + entry.uid + '">../<a href="#">' + entryRef.name + '</a></li>';	
 								}
 							});
 						});
-						node += '			</ul>';
-						node += '		</li>';
+						node += '		</ul>';
+						node += '	</li>';
 					});	
-					node += '		</ul>';	
+					node += '	</ul>';	
 				}
+
 				node += '	</span>';
 				node += '</li>';
 				ssidEL.append(node);
@@ -213,7 +230,7 @@ $(document).ready(function() {
 		    } else {
 		    	d2 = "";
 		    }
-		    return ($(b).attr('data-full-name').substring(0,1)) < ($(a).attr('data-full-name').substring(0,1)) ? 1 : -1;
+		    return ($(b).attr('data-full-name').substring(0,1).toLowerCase()) < ($(a).attr('data-full-name').substring(0,1).toLowerCase()) ? 1 : -1;
 		},
 
 		// --------------------------------------------------------------------------------
@@ -221,6 +238,14 @@ $(document).ready(function() {
 			// mouse events
 			//var count = 0;
 			$('ul.networks > li.network-name > span > a').each( function(){
+				//console.log('appending mouse: ' + count++);
+				$(this).click(function() {					
+					$(this).toggleClass('active').parent().parent().find('.l2').slideToggle( 'fast', function() {
+					});
+				});
+			});
+
+			$('ul.networks > li.network-name-geo > span > a').each( function(){
 				//console.log('appending mouse: ' + count++);
 				$(this).click(function() {					
 					$(this).toggleClass('active').parent().parent().find('.l2').slideToggle( 'fast', function() {
