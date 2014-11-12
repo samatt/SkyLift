@@ -10,11 +10,11 @@
 3: Add coordinates to politics
 		curl "http://www.datasciencetoolkit.org/coordinates2politics/37.769456%2c-122.429128"
 4: 
-
+curl "http://www.datasciencetoolkit.org/coordinates2politics/39.27048874%2c-76.61150360"
 */
 
 $(document).ready(function() {
-	var viewer, scene, primitives, handler, boards;
+	var viewer, scene, primitives, handler, boards, nodePnlMap;
 	$('#form-select-file-nw').hide();
 	$('#openFile').hide();
 	$('#form-select-file-w').hide();
@@ -25,13 +25,12 @@ $(document).ready(function() {
 		$('#form-select-file-w').hide();
 		$('#form-select-file-nw').show();
 		$('#openFile').show();
-	    var chooser = document.querySelector('#openFile');
+		var chooser = document.querySelector('#openFile');
 		var saveFilenameEl = document.querySelector('#saveFilename');
 		chooser.addEventListener('change', function(evt) {
-	  		console.log(this.value);
-	  		$('li.network-name').remove();
-	  		$('#network-list-title').html('Loading...');
-	  		skylift.loadSSIDList(this.value);
+			$('li.network-name').remove();
+			$('#network-list-title').html('Loading...');
+			skylift.loadSSIDList(this.value);
 		}, false);
 	}
 	else{
@@ -45,12 +44,12 @@ $(document).ready(function() {
 	var skylift = {
 		
 		entries: [],
+		nodeSsidMap:{},
 		loadID: 0,
 
 		// --------------------------------------------------------------------------------
 		
 		loadFileList: function( ){
-			console.log('HERE');
 			$.getJSON( '_private/data/_file_list.json', function( data ) {
 				var nodes = '';
 				nodes += '<option value="0"> Select File </option>';
@@ -74,25 +73,25 @@ $(document).ready(function() {
 
 			if(isNodeWebkit){
 				$.getJSON( file, function( data ) {
-				skylift.entries =[];
-				$.each(data, function(key,entry){
-					skylift.entries.push( entry );
-				});
-				skylift.onLoadSSIDList();
-			});	
+					skylift.entries =[];
+					$.each(data, function(key,entry){
+						skylift.entries.push( entry );
+					});
+					skylift.onLoadSSIDList();
+				});	
 			}
 			else{
-			$.getJSON( '_private/data/logs/' + file, function( data ) {
-				skylift.entries =[];
-				$.each(data, function(key,entry){
-					if(entry.ids.length <= 0){
-						console.log("No ids found for: " +entry.name);
-					}
+				$.getJSON( '_private/data/logs/' + file, function( data ) {
+					skylift.entries =[];
+					$.each(data, function(key,entry){
+						if(entry.ids.length <= 0){
+							console.log("No ids found for: " +entry.name);
+						}
 
-					skylift.entries.push( entry );	
+						skylift.entries.push( entry );	
+					});
+					skylift.onLoadSSIDList();
 				});
-				skylift.onLoadSSIDList();
-			});
 			}
 			
 		},
@@ -107,20 +106,29 @@ $(document).ready(function() {
             "tString": "2014-09-09 07:34:14", 
             "timestamp": "20140909073503"
         }, 
-        "ids": [], 
+        "ids": [
+                "08:70:45:52:76:cc", 
+                "d8:9e:3f:7c:bf:f4"
+               ]
         "name": "Justin's iPad"
     }, 
+    */
+    /*
+	nodeSSIDMap 
+	{
+		"3A:0F:4A:AC:36:85" : []
+	
+	}
+
     */
 
     onLoadSSIDList: function(){
     	$('#network-list-title').html('Networks');
-    	console.log('onLoadSSIDList');
-			//var count = 0;
 
-			var ssidEL = $('ul.networks');
-			var node = '';
-			var uid = 1;
-			
+    	var ssidEL = $('ul.networks');
+    	var node = '';
+    	var uid = 1;
+
 			// Give everything a unique ID (uid)
 			$.each( skylift.entries, function(k1,entry){
 				entry.uid = uid++;
@@ -131,7 +139,6 @@ $(document).ready(function() {
 				// filter out
 				if( entry.name === null || entry.name === "") return;
 				
-				
 				if( !(
 					entry.geo === null || entry.geo === undefined
 					|| entry.geo.lat === undefined
@@ -141,7 +148,7 @@ $(document).ready(function() {
 					|| entry.geo.lon === ''
 					|| entry.geo.lat === ''
 					) ){
-				node =  '<li class="network-name" data-net-uid="' + entry.uid + '" data-full-name="' + entry.name + '">';
+					node =  '<li class="network-name" data-net-uid="' + entry.uid + '" data-full-name="' + entry.name + '">';
 				// node += '<span style="display:block"><a class="network-name-geo" href="#" >' + entry.name + '</a> (' + entry.ids.length + ')</span>';
 				node += '<span style="display:block"><a class="network-name-geo" href="#" >' + entry.name +'</a></span>	';
 				node += '	<span class="l2">'; // hide elements until clicked
@@ -177,11 +184,25 @@ $(document).ready(function() {
 					$.each( entry.ids, function(k2,id){
 						node += '		<li><a href="#">' + id + '</a>';
 						// for each network name associated with this mac address
+						skylift.nodeSsidMap[id] = [];
 						node += '		<ul class="ssid-mac">';
 						$.each( skylift.entries, function(k3, entryRef){
 							$.each( entryRef.ids, function(k4,idRef){
 								if( idRef === id ){
 									node += '			<li data-net-uid="' + entryRef.uid + '" data-parent-uid="' + entry.uid + '">../<a href="#">' + entryRef.name + '</a></li>';	
+									// console.log(id + " " + entryRef.name);
+									if( !(
+									entryRef.geo === null || entryRef.geo === undefined 
+									|| entryRef.geo.lat === undefined
+									|| entryRef.geo.lon === undefined
+									|| entryRef.geo.lat === null
+									|| entryRef.geo.lon === null
+									|| entryRef.geo.lon === ''
+									|| entryRef.geo.lat === ''
+									) ){
+										skylift.nodeSsidMap[id].push([entryRef.geo.lat,entryRef.geo.lon,entryRef.name]);
+									}
+									
 								}
 							});
 						});
@@ -197,12 +218,12 @@ $(document).ready(function() {
 				node = null;
 			});
 
-			console.log('set mouse events');
-			this.attachSSIDMouseEvents();
-			this.sortMeu("alphabetically");
-			console.log('set network markers');
-			
-			setGeoMarkers(); // function hanging outside scope, fix later
+console.log('set mouse events');
+this.attachSSIDMouseEvents();
+this.sortMeu("alphabetically");
+console.log('set network markers');
+
+			setGeoMarkers(	); // function hanging outside scope, fix later
 		},
 
 		sortMeu: function(order){
@@ -214,7 +235,7 @@ $(document).ready(function() {
 		},
 
 		sort_li: function(a, b){
-		
+
 		    //return ($(b).data('position')) < ($(a).data('position')) ? 1 : -1;
 		    var d1 = $(b).attr('data-full-name');
 		    
@@ -257,8 +278,11 @@ $(document).ready(function() {
 				$(this).click(function() {
 					// toggle css class
 					$(this).parent().find('ul.ssid-mac').slideToggle( 'fast', function() {
-				  	console.log($(this).parent().find('a').html()); // outputs MAC addr
+						var key = $(this).parent().find('a').html();
+				  	console.log(key); // outputs MAC addr
+				  	setGeoMarkers(key)
 				  }).parent().find('a').eq(0).toggleClass('active');
+					;
 				});
 			});
 			
@@ -290,8 +314,9 @@ $(document).ready(function() {
 				  	});
 				  	$(this).parent().find('a').eq(0).removeClass('active');
 				  });
+				  setGeoMarkers()
 				});
-});
+			});
 
 			// Lat/Long clickable
 			$('li.latlong a').each( function(){
@@ -341,6 +366,7 @@ $(document).ready(function() {
 	window.skylift = skylift;
 	
 	window.viewer = viewer;
+	window.nodePnlMap = nodePnlMap;
 	
 	$( window ).resize(function() {
 		$( '#cesium-parent-container' ).css('height',$(window).height() );
@@ -372,6 +398,8 @@ $(document).ready(function() {
 		try{
 			viewer = new Cesium.Viewer('cesiumContainer');
 			scene = viewer.scene;
+			nodePnlMap = new WebGLGlobeDataSource();
+			console.log
 			primitives = scene.primitives;
 			cesiumInited = true;
 			console.log('ok, init');
@@ -393,7 +421,7 @@ $(document).ready(function() {
 		return Math.floor(Math.random() * (max - min)) + min;
 	}
 	// Getting messy
-	function setGeoMarkers(){
+	function setGeoMarkers(nodeID){
 
 		if( cesiumInited !== true ){
 			isCesiumReady();
@@ -410,62 +438,93 @@ $(document).ready(function() {
 	    context2D.fillStyle = 'rgb(255, 255, 255)';
 	    context2D.fill();
 
-		//remove old primitives
-		primitives.removeAll();
+		//remove old primitives		
 		boards = {};
-		
-		var billboards = primitives.add(new Cesium.BillboardCollection());
-		var count = 0;
+		if(primitives){
+			primitives.removeAll();
+		}
+		console.log(nodeID);
+		if(nodeID){
 
+			if(viewer.dataSources){
+				//true is for destroy along with remove. Might change this later.
+				viewer.dataSources.removeAll(true)	
+			}
+			
+			console.log(nodeID);
+			var nodeData = skylift.nodeSsidMap[nodeID];
+			// viewer.clock.shouldAnimate = false;
+			// nodePnlMap._entityCollection.removeAll();
+			
+			
+			//Formatting for list for WebGL Globe JSON
+			//[["series1",[latitude, longitude, height, ... ]
+    		// ["series2",[latitude, longitude, height, ... ]]
+			
+			// Only doing one series for now
+			var merged = [];
+			merged = merged.concat.apply(merged, nodeData);
+			merged = [[nodeID,merged]];
+			console.log(merged);
+			// viewer.dataSources = viewer.dataSources && viewer.dataSources.destroy();
+			viewer.dataSources.add(nodePnlMap);
+			nodePnlMap.load(merged);
+		}
+		else{
+			
+			var billboards = primitives.add(new Cesium.BillboardCollection());
+			var count = 0;
+			$.each( skylift.entries, function(key,entry){
 
-		$.each( skylift.entries, function(key,entry){
-
-			if( Math.abs(entry.geo.lat) > 0 && Math.abs(entry.geo.lon) > 0 ){
-				var b  = billboards.add({
-					imageId : 'Point ' + count + ', uid: ' + entry.uid,
-					id :entry.uid,
-					image : canvas,
+				if( Math.abs(entry.geo.lat) > 0 && Math.abs(entry.geo.lon) > 0 ){
+					var b  = billboards.add({
+						imageId : 'Point ' + count + ', uid: ' + entry.uid,
+						id :entry.uid,
+						image : canvas,
 				        position : Cesium.Cartesian3.fromDegrees(entry.geo.lon, entry.geo.lat), // long, lat
 				        color : Cesium.Color.RED
 				    });
-				count++;
-				boards[entry.uid.toString()] = b;
-			}
-		});
+					count++;
+					boards[entry.uid.toString()] = b;
+				}
+			});
+			
+			//remove old event handler
+   			handler = handler && handler.destroy();
+		    handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+		    handler.setInputAction(
+		    	function (movement) {
 
-	    //remove old event handler
-	    handler = handler && handler.destroy();
-	    handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
-	    handler.setInputAction(
-	    	function (movement) {
-				
-					$.each(boards, function(key, value) {
-						value.color = Cesium.Color.RED;		 	
-					});
+		    		$.each(boards, function(key, value) {
+		    			value.color = Cesium.Color.RED;		 	
+		    		});
 
-	            	var pickedObject = scene.pick(movement.endPosition);
-	            	if(Cesium.defined(pickedObject)){
+		    		var pickedObject = scene.pick(movement.endPosition);
+		    		if(Cesium.defined(pickedObject)){
 
-	            		if (Cesium.defined(pickedObject) && (pickedObject.primitive === boards[pickedObject.id.toString()])) {
+		    			if (Cesium.defined(pickedObject) && (pickedObject.primitive === boards[pickedObject.id.toString()])) {
 
-							boards[pickedObject.id.toString()].color =Cesium.Color.WHITE;
-							$.each( skylift.entries, function(key,entry){
-								if(entry.uid == pickedObject.id ){
-									console.log(entry);
+		    				boards[pickedObject.id.toString()].color =Cesium.Color.WHITE;
+		    				$.each( skylift.entries, function(key,entry){
+		    					if(entry.uid == pickedObject.id ){
+									// console.log(entry);con
 									$('#network-list-title').html("Current : "+ entry.name);
 
 								}
 							});
-						} 
-					}
-					else{
-						$('#network-list-title').html('Networks');
-					}
-				},
-				Cesium.ScreenSpaceEventType.MOUSE_MOVE
-				);
-	    
-	    drawAllLines();
+		    			} 
+		    		}
+		    		else{
+		    			$('#network-list-title').html('Networks');
+		    		}
+		    	},
+		    	Cesium.ScreenSpaceEventType.MOUSE_MOVE
+		    );
+
+		}
+
+
+	    // drawAllLines();
 	}
 
 	 // Fly to location
