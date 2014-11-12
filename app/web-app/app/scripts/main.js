@@ -14,7 +14,7 @@ curl "http://www.datasciencetoolkit.org/coordinates2politics/39.27048874%2c-76.6
 */
 
 $(document).ready(function() {
-	var viewer, scene, primitives, handler, boards, nodePnlMap;
+	var viewer, scene, primitives, handler, boards;
 	$('#form-select-file-nw').hide();
 	$('#openFile').hide();
 	$('#form-select-file-w').hide();
@@ -366,7 +366,6 @@ console.log('set network markers');
 	window.skylift = skylift;
 	
 	window.viewer = viewer;
-	window.nodePnlMap = nodePnlMap;
 	
 	$( window ).resize(function() {
 		$( '#cesium-parent-container' ).css('height',$(window).height() );
@@ -398,7 +397,6 @@ console.log('set network markers');
 		try{
 			viewer = new Cesium.Viewer('cesiumContainer');
 			scene = viewer.scene;
-			nodePnlMap = new WebGLGlobeDataSource();
 			console.log
 			primitives = scene.primitives;
 			cesiumInited = true;
@@ -443,32 +441,57 @@ console.log('set network markers');
 		if(primitives){
 			primitives.removeAll();
 		}
-		console.log(nodeID);
-		if(nodeID){
 
-			if(viewer.dataSources){
-				//true is for destroy along with remove. Might change this later.
-				viewer.dataSources.removeAll(true)	
-			}
+		if(nodeID){
 			
-			console.log(nodeID);
 			var nodeData = skylift.nodeSsidMap[nodeID];
-			// viewer.clock.shouldAnimate = false;
-			// nodePnlMap._entityCollection.removeAll();
 			
-			
-			//Formatting for list for WebGL Globe JSON
+			//Formatting for list for WebGL Globe JSON. Just so it fits the standard. Not essential
 			//[["series1",[latitude, longitude, height, ... ]
     		// ["series2",[latitude, longitude, height, ... ]]
 			
 			// Only doing one series for now
 			var merged = [];
 			merged = merged.concat.apply(merged, nodeData);
-			merged = [[nodeID,merged]];
-			console.log(merged);
-			// viewer.dataSources = viewer.dataSources && viewer.dataSources.destroy();
-			viewer.dataSources.add(nodePnlMap);
-			nodePnlMap.load(merged);
+
+        	var count = 0;
+        	var coordinates = merged;
+        	var billboards = primitives.add(new Cesium.BillboardCollection());
+			for (var i = 0; i < coordinates.length; i += 3) {
+            	var latitude = coordinates[i];
+            	var longitude = coordinates[i + 1];
+            	var name = coordinates[i + 2];
+           		var height = i/coordinates.length;
+            	var color = Cesium.Color.fromHsl((0.6 - (height * 0.5)), 1.0, 0.5,0.5);        	
+				var b  = billboards.add({
+					imageId : 'Point ' + count + ', uid: ' + name,
+					id :name,
+					image : canvas,
+		        	position : Cesium.Cartesian3.fromDegrees(longitude, latitude), // long, lat
+		        	color : color
+		    	});
+				count++;
+				boards[name.toString()] = b;	
+        	}
+
+			handler = handler && handler.destroy();
+	    	handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+	    	handler.setInputAction(
+	    	function (movement) {
+	    		var pickedObject = scene.pick(movement.endPosition);
+	    		if(Cesium.defined(pickedObject)){
+	    			if (Cesium.defined(pickedObject) && (pickedObject.primitive === boards[pickedObject.id.toString()])) {
+	    				$.each( skylift.entries, function(key,entry){
+	    					if(entry.name == pickedObject.id ){
+								$('#network-list-title').html("Current : "+ entry.name);
+							}
+						});
+	    			} 
+	    		}
+	    		else{
+	    			$('#network-list-title').html('Networks');
+	    		}
+    		},Cesium.ScreenSpaceEventType.MOUSE_MOVE);        	
 		}
 		else{
 			
@@ -487,43 +510,36 @@ console.log('set network markers');
 					count++;
 					boards[entry.uid.toString()] = b;
 				}
+
+			handler = handler && handler.destroy();
+	    	handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+	    	handler.setInputAction(
+	    	function (movement) {
+
+	    		$.each(boards, function(key, value) {
+	    			value.color = Cesium.Color.RED;		 	
+	    		});
+
+	    		var pickedObject = scene.pick(movement.endPosition);
+	    		if(Cesium.defined(pickedObject)){
+
+	    			if (Cesium.defined(pickedObject) && (pickedObject.primitive === boards[pickedObject.id.toString()])) {
+
+	    				boards[pickedObject.id.toString()].color =Cesium.Color.WHITE;
+	    				$.each( skylift.entries, function(key,entry){
+	    					if(entry.uid == pickedObject.id ){
+								$('#network-list-title').html("Current : "+ entry.name);
+
+							}
+						});
+	    			} 
+	    		}
+	    		else{
+	    			$('#network-list-title').html('Networks');
+	    		}
+    		},Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 			});
-			
-			//remove old event handler
-   			handler = handler && handler.destroy();
-		    handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
-		    handler.setInputAction(
-		    	function (movement) {
-
-		    		$.each(boards, function(key, value) {
-		    			value.color = Cesium.Color.RED;		 	
-		    		});
-
-		    		var pickedObject = scene.pick(movement.endPosition);
-		    		if(Cesium.defined(pickedObject)){
-
-		    			if (Cesium.defined(pickedObject) && (pickedObject.primitive === boards[pickedObject.id.toString()])) {
-
-		    				boards[pickedObject.id.toString()].color =Cesium.Color.WHITE;
-		    				$.each( skylift.entries, function(key,entry){
-		    					if(entry.uid == pickedObject.id ){
-									// console.log(entry);con
-									$('#network-list-title').html("Current : "+ entry.name);
-
-								}
-							});
-		    			} 
-		    		}
-		    		else{
-		    			$('#network-list-title').html('Networks');
-		    		}
-		    	},
-		    	Cesium.ScreenSpaceEventType.MOUSE_MOVE
-		    );
-
 		}
-
-
 	    // drawAllLines();
 	}
 
